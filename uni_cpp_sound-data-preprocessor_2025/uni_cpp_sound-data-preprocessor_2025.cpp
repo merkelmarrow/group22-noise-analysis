@@ -1,18 +1,17 @@
-﻿// uni_cpp_sound-data-preprocessor_2025.cpp
-
-#include "csv.hpp"
-
+﻿#include "csv.hpp"
 #include <iostream>
 #include <string>
 #include <map>
 #include <fstream>
 #include <utility>
 #include <filesystem>
+#include <algorithm>
+
+namespace fs = std::filesystem;
 
 // Function declarations
 void process_file(const std::string& input_filename);
 std::vector<std::string> get_csv_files_in_directory(const std::string& directory_path = ".");
-
 
 int main()
 {
@@ -38,9 +37,11 @@ int main()
 	}
 	catch (const std::exception& e) {
 		std::cerr << "Error: " << e.what() << std::endl;
+		return 1;
 	}
 
-	std::getc;
+	std::cout << "Press Enter to continue..." << std::endl;
+	std::cin.get();
 
 	return 0;
 }
@@ -48,14 +49,16 @@ int main()
 std::vector<std::string> get_csv_files_in_directory(const std::string& directory_path) {
 	std::vector<std::string> csv_files;
 
-	for (const auto& entry : std::filesystem::directory_iterator(directory_path)) {
+	for (const auto& entry : fs::directory_iterator(directory_path)) {
 		if (entry.is_regular_file()) {
 			std::string filename = entry.path().filename().string();
 			// Check if file ends with .csv (case-insensitive)
-			std::string extension = filename.substr(filename.find_last_of(".") + 1);
-			std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
-			if (extension == "csv" && filename.find("_preprocessed") == std::string::npos) {
-				csv_files.push_back(filename);
+			if (filename.length() >= 4) {
+				std::string extension = filename.substr(filename.length() - 4);
+				std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+				if (extension == ".csv" && filename.find("_preprocessed") == std::string::npos) {
+					csv_files.push_back(filename);
+				}
 			}
 		}
 	}
@@ -72,7 +75,6 @@ void process_file(const std::string& input_filename)
 		// Map to store sum of gains for each 5-second bucket
 		// Key: bucket number (0 for 0-5, 5 for 5-10, etc)
 		// Value: pair-> sum of gains, number of data points in bucket
-
 		std::map<int, std::pair<double, int>> gain_buckets;
 
 		for (csv::CSVRow& row : reader)
@@ -84,7 +86,7 @@ void process_file(const std::string& input_filename)
 			if (time > 780) break;
 
 			// Calculate bucket number
-			int bucket = time / 5;
+			int bucket = static_cast<int>(time / 5);
 
 			// Add to bucket
 			gain_buckets[bucket].first += gain;
@@ -93,9 +95,11 @@ void process_file(const std::string& input_filename)
 
 		// Write to output file
 		std::ofstream output_file(output_filename);
-		
-		auto writer = csv::make_csv_writer(output_file);
+		if (!output_file.is_open()) {
+			throw std::runtime_error("Could not open output file: " + output_filename);
+		}
 
+		auto writer = csv::make_csv_writer(output_file);
 		writer << std::vector<std::string> {"time", "avg_gain"};
 
 		for (const auto& [bucket, pair] : gain_buckets)
@@ -104,16 +108,16 @@ void process_file(const std::string& input_filename)
 			auto bucket_count = pair.second;
 
 			double time = (bucket + 1) * 5;
-			double avg_gain = sum / bucket_count; // average gain over 5 seconds
+			double avg_gain = sum / bucket_count;
 
 			writer << std::make_tuple(time, avg_gain);
 		}
-		
+
 		std::cout << "File " << input_filename << " processed ..." << std::endl;
 		std::cout << "Output written to " << output_filename << std::endl;
-		
 	}
 	catch (const std::exception& e) {
 		std::cerr << "Error processing file " << input_filename << ": " << e.what() << std::endl;
+		throw; // Re-throw to be caught by main
 	}
 }
