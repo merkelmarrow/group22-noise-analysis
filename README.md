@@ -18,8 +18,8 @@
    ```
 4. Merge changes into repo:
    - Push to main for small changes.
-   - Create a PR before merging to main when a version is ready). 
-   - Delete branch locally and on remote.
+   - Create a PR before merging to main when a version is ready. 
+   - After merging delete branch locally and on remote.
    ```bash
    git branch -d <branch-name>
    git push origin --delete <branch-name>
