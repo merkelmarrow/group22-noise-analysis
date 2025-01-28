@@ -14,11 +14,17 @@
    ```bash
    git add .
    git commit -m "Message describing changes"
-   git push origin <branch name>
+   git push origin <branch-name>
    ```
-4. Merge changes into repo:
-   - Push to main for small changes.
-   - Create a PR before merging to main when a version is ready. 
+4. Merge changes into main:
+   - merge to main for small or low risk changes.
+   ```bash
+   git checkout main
+   git pull origin main
+   git merge <branch-name>
+   git push origin main
+   ```
+   - Or create a PR on GitHub before merging to main when a version is ready.
    - After merging delete branch locally and on remote.
    ```bash
    git branch -d <branch-name>
