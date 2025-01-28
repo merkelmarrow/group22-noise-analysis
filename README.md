@@ -27,6 +27,6 @@
 
 Branches:
 - main (commit raw data to main)
-- scripts/<description>-<name> (commit changes to scripts here, push/PR to main when version is working)
-- data/<description>-<name> (commit changes to group CSV here, push to main when done)
-- report/<description>-<name> (commit changes to report, push/PR to main when finishing)
+- scripts/\<description\>-\<name\> (commit changes to scripts here, push/PR to main when version is working)
+- data/\<description\>-\<name\> (commit changes to group CSV here, push to main when done)
+- report/\<description\>-\<name\> (commit changes to report, push/PR to main when finishing)
