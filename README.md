@@ -5,8 +5,9 @@
    ```bash
    git clone https://github.com/merkelmarrow/group22-noise-analysis
    ```
-2. Create feature branch for a given task:
+2. Create branch for a given task:
    ```bash
+   git pull origin main
    git checkout -b <branch-name>
    ```
 3. Commit changes often:
@@ -18,7 +19,7 @@
 4. Merge changes into repo:
    - Push to main for small changes.
    - Create a PR before merging to main when a version is ready). 
-   - Delete branch
+   - Delete branch locally and on remote.
    ```bash
    git branch -d <branch-name>
    git push origin --delete <branch-name>
