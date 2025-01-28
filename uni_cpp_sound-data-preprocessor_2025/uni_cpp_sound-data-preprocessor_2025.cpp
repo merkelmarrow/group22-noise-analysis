@@ -28,6 +28,8 @@ int main()
 		process_file(filename);
 	}
 
+	std::getc;
+
 	return 0;
 }
 
