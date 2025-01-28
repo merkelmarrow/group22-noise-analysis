@@ -1,39 +1,21 @@
 # group22-noise-analysis
 
-## Schedule
-Times each day:
-   - 8 am
-   - 1 pm
-   - 7 pm
+# Weekly Schedule
 
-### Wednesday 28th
-Nassau -> Ane
-
-Pearse -> Leanne
-
-Front -> Daniel
-
-### Thursday 28th
-Nassau -> Marco
-
-Pearse -> Aryan
-
-Front -> Daniel
-
-### Friday 28th
-Nassau -> Aryan
-
-Pearse -> Ane
-
-Front -> Marco
-
-### Sunday 28th
-Nassau -> Aryan
-
-Pearse -> Leanne
-
-Front -> Marco
-
+| Day       | Time  | Nassau | Pearse | Front  |
+|-----------|-------|--------|--------|--------|
+| Wed 29th  | 8 AM  | Ane    | Leanne | Daniel |
+|           | 1 PM  | Ane    | Leanne | Daniel |
+|           | 7 PM  | Ane    | Leanne | Daniel |
+| Thu 30th  | 8 AM  | Marco  | Aryan  | Daniel |
+|           | 1 PM  | Marco  | Aryan  | Daniel |
+|           | 7 PM  | Marco  | Aryan  | Daniel |
+| Fri 31st  | 8 AM  | Aryan  | Ane    | Marco  |
+|           | 1 PM  | Aryan  | Ane    | Marco  |
+|           | 7 PM  | Aryan  | Ane    | Marco  |
+| Sun 2nd   | 8 AM  | Aryan  | Leanne | Marco  |
+|           | 1 PM  | Aryan  | Leanne | Marco  |
+|           | 7 PM  | Aryan  | Leanne | Marco  |
 
 
 ## Git workflow
