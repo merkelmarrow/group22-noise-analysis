@@ -6,6 +6,7 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include <utility>
 
 // Function declarations
 void process_file(const std::string& input_filename);
@@ -24,7 +25,7 @@ int main()
 
 	for (const auto& filename : filenames)
 	{
-		// Process files here
+		process_file(filename);
 	}
 
 	return 0;
@@ -32,15 +33,15 @@ int main()
 
 void process_file(const std::string& input_filename)
 {
-	std::string output_filename = input_filename.substr(0, input_filename.find(".csv")) + "_preprocessed.csv");
+	std::string output_filename = input_filename.substr(0, input_filename.find(".csv")) + "_preprocessed.csv";
 	try {
 		csv::CSVReader reader(input_filename);
 
 		// Map to store sum of gains for each 5-second bucket
 		// Key: bucket number (0 for 0-5, 5 for 5-10, etc)
-		// Value: sum of gains
+		// Value: pair-> sum of gains, number of data points in bucket
 
-		std::map<int, double> gain_buckets;
+		std::map<int, std::pair<double, int>> gain_buckets;
 
 		for (csv::CSVRow& row : reader)
 		{
@@ -51,10 +52,11 @@ void process_file(const std::string& input_filename)
 			if (time > 780) break;
 
 			// Calculate bucket number
-			int bucket = static_cast<int>(time / 5.0) * 5;
+			int bucket = time / 5;
 
 			// Add to bucket
-			gain_buckets[bucket] += gain;
+			gain_buckets[bucket].first += gain;
+			gain_buckets[bucket].second++;
 		}
 
 		// Write to output file
@@ -64,10 +66,13 @@ void process_file(const std::string& input_filename)
 
 		writer << std::vector<std::string> {"time", "avg_gain"};
 
-		for (const auto& [bucket, sum] : gain_buckets)
+		for (const auto& [bucket, pair] : gain_buckets)
 		{
+			auto sum = pair.first;
+			auto bucket_count = pair.second;
+
 			double time = (bucket + 1) * 5;
-			double avg_gain = sum / 5.0;
+			double avg_gain = sum / bucket_count; // average gain over 5 seconds
 
 			writer << std::make_tuple(time, avg_gain);
 		}
