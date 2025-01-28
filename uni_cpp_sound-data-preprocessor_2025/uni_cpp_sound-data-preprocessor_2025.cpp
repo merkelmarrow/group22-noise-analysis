@@ -7,30 +7,60 @@
 #include <map>
 #include <fstream>
 #include <utility>
+#include <filesystem>
 
 // Function declarations
 void process_file(const std::string& input_filename);
+std::vector<std::string> get_csv_files_in_directory(const std::string& directory_path = ".");
 
 
 int main()
 {
-	std::string filename;
-	std::vector<std::string> filenames;
+	try {
+		auto csv_files = get_csv_files_in_directory();
+		if (csv_files.empty()) {
+			std::cout << "No csv files found in current directory." << std::endl;
+			return 1;
+		}
 
-	std::cout << "Enter csv filenames (one per line, empty line when done): " << std::endl;
-	while (std::getline(std::cin, filename) && !filename.empty())
-	{
-		filenames.push_back(filename);
+		std::cout << "Found " << csv_files.size() << " csv files in current directory." << std::endl;
+		for (const auto& file : csv_files) {
+			std::cout << "- " << file << std::endl;
+		}
+		std::cout << std::endl;
+
+		// Process each file
+		for (const auto& filename : csv_files) {
+			process_file(filename);
+		}
+
+		std::cout << "\nAll files processed successfully!" << std::endl;
 	}
-
-	for (const auto& filename : filenames)
-	{
-		process_file(filename);
+	catch (const std::exception& e) {
+		std::cerr << "Error: " << e.what() << std::endl;
 	}
 
 	std::getc;
 
 	return 0;
+}
+
+std::vector<std::string> get_csv_files_in_directory(const std::string& directory_path) {
+	std::vector<std::string> csv_files;
+
+	for (const auto& entry : std::filesystem::directory_iterator(directory_path)) {
+		if (entry.is_regular_file()) {
+			std::string filename = entry.path().filename().string();
+			// Check if file ends with .csv (case-insensitive)
+			std::string extension = filename.substr(filename.find_last_of(".") + 1);
+			std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+			if (extension == "csv" && filename.find("_preprocessed") == std::string::npos) {
+				csv_files.push_back(filename);
+			}
+		}
+	}
+
+	return csv_files;
 }
 
 void process_file(const std::string& input_filename)
