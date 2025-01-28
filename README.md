@@ -1,5 +1,30 @@
 # group22-noise-analysis
 
+## Schedule
+Times each day:
+   - 8 am
+   - 1 pm
+   - 7 pm
+
+### Wednesday 28th
+Nassau -> Ane
+Pearse -> Leanne
+Front -> Daniel
+### Thursday 28th
+Nassau -> Marco
+Pearse -> Aryan
+Front -> Daniel
+### Friday 28th
+Nassau -> Aryan
+Pearse -> Ane
+Front -> Marco
+### Sunday 28th
+Nassau -> Aryan
+Pearse -> Leanne
+Front -> Marco
+
+
+
 ## Git workflow
 1. Clone the repo:
    ```bash
