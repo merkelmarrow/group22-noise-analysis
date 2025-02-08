@@ -1,4 +1,8 @@
-﻿#include "csv.hpp"
+﻿// uni_cpp_sound-data-preprocessor_2025.coo
+
+// NB: requires C++20 for std::chrono::parse
+
+#include "csv.hpp"
 #include <iostream>
 #include <string>
 #include <map>
@@ -7,6 +11,8 @@
 #include <filesystem>
 #include <algorithm>
 #include <chrono>
+#include <sstream>
+#include <cctype>
 
 namespace fs = std::filesystem;
 
