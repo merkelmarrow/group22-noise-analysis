@@ -6,12 +6,14 @@
 #include <utility>
 #include <filesystem>
 #include <algorithm>
+#include <chrono>
 
 namespace fs = std::filesystem;
 
 // Function declarations
 void process_file(const std::string& input_filename);
 std::vector<std::string> get_csv_files_in_directory(const std::string& directory_path = ".");
+double get_time(const std::string time_string);
 
 int main()
 {
@@ -120,4 +122,27 @@ void process_file(const std::string& input_filename)
 		std::cerr << "Error processing file " << input_filename << ": " << e.what() << std::endl;
 		throw; // Re-throw to be caught by main
 	}
+}
+
+double get_time_secs(std::string& time_string, bool& is_date_format) {
+	double result = 0.0;
+
+
+	try {
+		result = std::stod(time_string);
+	}
+	catch (std::exception& e) {
+		// since stod failed, presume it's a date-time format
+		is_date_format = true;
+		std::istringstream in(time_string);
+		std::chrono::system_clock::time_point tp;
+
+		// %OS tells parser to accept seconds including any fractional component
+		in >> std::chrono::parse("%Y-%m-%dT%H:%M:%OSZ", tp);
+		std::time_t epoch_time = std::chrono::system_clock::to_time_t(tp);
+		
+		// time_string = STRING VERSION OF epoch_time here (including fractional seconds)
+		// return -1.0;
+	}
+	return result;
 }
