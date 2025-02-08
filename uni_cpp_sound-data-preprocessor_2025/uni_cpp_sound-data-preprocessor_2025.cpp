@@ -1,4 +1,4 @@
-﻿// uni_cpp_sound-data-preprocessor_2025.coo
+﻿// uni_cpp_sound-data-preprocessor_2025.cpp
 
 // NB: requires C++20 for std::chrono::parse
 
@@ -21,6 +21,9 @@ void process_file(const std::string& input_filename);
 std::vector<std::string> get_csv_files_in_directory(const std::string& directory_path = ".");
 double get_time_secs(std::string& time_string, bool& is_date_format);
 void isodate_str_to_epochtime_conv(std::string& time_string);
+bool parse_iso_utc(const std::string& original, std::chrono::system_clock::time_point& tp);
+
+static constexpr auto iso_format_no_tz = "%Y-%m-%dT%H:%M:%S.%fZ";
 
 int main()
 {
@@ -144,28 +147,46 @@ void process_file(const std::string& input_filename)
 
 double get_time_secs(std::string& time_string, bool& is_date_format) {
 	double time = 0.0;
+	size_t consumed = 0;
 	try {
-		time = std::stod(time_string);
+		time = std::stod(time_string, &consumed);
+		std::cerr << "[DEBUG] " << time_string << " was interpreted as numeric: "
+			<< time << std::endl;
+
+		while (consumed < time_string.size() && std::isspace(static_cast<unsigned char>(time_string[consumed]))) {
+			consumed++;
+		}
+
+		if (consumed != time_string.size()) {
+			// Not all characters were part of the double => must be an ISO string or something else
+			throw std::invalid_argument("Incorrect pase, trying ISO date parse.");
+		}
 	}
-	catch (std::exception& e) {
+	catch (...) {
 		// If conversion fails, assume the string is an ISO date.
+
+		std::cerr << "[DEBUG] std::stod() failed for \"" << time_string
+			<< "\" => trying ISO8601 parse." << std::endl;
+
 		is_date_format = true;
 		isodate_str_to_epochtime_conv(time_string);
 		time = std::stod(time_string);  // Now time_string holds the numeric value.
+
+		std::cerr << "[DEBUG] " << time_string << " => " << time << std::endl;
 	}
 	return time;
 }
 
 
 void isodate_str_to_epochtime_conv(std::string& time_string) {
+	std::cerr << "[DEBUG] isodate_str_to_epochtime_conv called with: "
+		<< time_string << std::endl;
+
 	double time = 0.0;
 	std::istringstream iss(time_string);
 	std::chrono::system_clock::time_point tp;
 
-	// %OS tells parser to accept seconds including any fractional component
-	iss >> std::chrono::parse("%Y-%m-%dT%H:%M:%OSZ", tp);
-
-	if (iss.fail()) {
+	if (!parse_iso_utc(time_string, tp)) {
 		throw std::runtime_error("Invalid time format: " + time_string);
 	}
 
@@ -176,6 +197,7 @@ void isodate_str_to_epochtime_conv(std::string& time_string) {
 
 	try {
 		time = secs.count() + std::chrono::duration<double>(fractional).count();
+		std::cerr << "[DEBUG] Parsed epoch time: " << std::fixed << time << std::endl;
 	}
 	catch (std::exception& e) {
 		std::cerr << "Error processing date format: " << e.what();
@@ -183,4 +205,28 @@ void isodate_str_to_epochtime_conv(std::string& time_string) {
 
 
 	time_string = std::to_string(time);
+	std::cerr << "[DEBUG] => epoch time: " << time_string << std::endl;
+}
+
+bool parse_iso_utc(const std::string& original, std::chrono::system_clock::time_point& tp)
+{
+	// make a copy and delete the Z
+	std::string s = original;
+	if (!s.empty() && s.back() == 'Z') {
+		s.pop_back();
+	}
+
+	// try parse with fractional seconds
+	{
+		std::istringstream iss(s);
+		iss >> std::chrono::parse("%Y-%m-%dT%H:%M:%S.%f", tp);
+		if (!iss.fail()) {
+			return true;
+		}
+	}
+
+	// if fail
+	std::cerr << "[ERROR] Could not parse '" << original
+		<< "' with either fractional or no-fraction format.\n";
+	return false;
 }
