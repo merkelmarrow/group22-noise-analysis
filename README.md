@@ -24,22 +24,24 @@ An application to preprocess time/gain .csv data is located in uni_cpp_sound-dat
 
 - Automatically processes all CSV files in the working directory
 - Groups gain data into 5-second buckets, and calculates averages up to 13 minutes
+- Supports relative timestamps and ISO 8601 date time formats.
+- Converts absolute timestamps to relative from start of measurements.
 
 ### Installation
 
-If you use 64-bit windows, an executable is already available in uni_cpp_sound-data-preprocessor_2025/executables.
+If you use 64-bit windows, an executable is already available in uni_cpp_sound-data-preprocessor_2025/executables. Use win64-data-preprocessor-2.1.exe for latest version.
 
 Otherwise, you have to build the program with CMake.
 
 ### Build with CMake
 You need:
-- C++17 compiler
+- C++20 compiler
 - CMake 3.8+ configured with compiler
 - Git
 
 ```bash
 git clone https://github.com/merkelmarrow/group22-noise-analysis/
-cd uni_cpp_sound-data-preprocessor_2025
+cd group22-noise-analysis/uni_cpp_sound-data-preprocessor_2025
 mkdir build && cd build
 cmake ..
 cmake --build .
