@@ -13,7 +13,8 @@ namespace fs = std::filesystem;
 // Function declarations
 void process_file(const std::string& input_filename);
 std::vector<std::string> get_csv_files_in_directory(const std::string& directory_path = ".");
-double get_time(const std::string time_string);
+double get_time_secs(std::string& time_string, bool& is_date_format);
+void isodate_str_to_epochtime_conv(std::string& time_string);
 
 int main()
 {
@@ -79,9 +80,24 @@ void process_file(const std::string& input_filename)
 		// Value: pair-> sum of gains, number of data points in bucket
 		std::map<int, std::pair<double, int>> gain_buckets;
 
+		bool is_date_format = false;
+		bool is_first = true;
+		double start_time = 0.0;
+
 		for (csv::CSVRow& row : reader)
 		{
-			double time = row["time"].get<double>();
+			std::string time_str = row["time"].get<std::string>();
+			double time;
+			if (is_first) {
+				if ((time = get_time_secs(time_str, is_date_format)) == -1.0) start_time = time;
+				is_first = false;
+			} else time = get_time_secs(time_str, is_date_format);
+
+			// Run get_time_secs again because time_str will be converted to appropriate format after last run
+			bool always_false = false;
+			time = get_time_secs(time_str, always_false);
+
+			time -= start_time;
 			double gain = row["gain"].get<double>();
 
 			// ignore data after 13 minutes == 780 seconds
@@ -125,24 +141,51 @@ void process_file(const std::string& input_filename)
 }
 
 double get_time_secs(std::string& time_string, bool& is_date_format) {
-	double result = 0.0;
+	double time = 0.0;
 
+	if (is_date_format) {
+		isodate_str_to_epochtime_conv(time_string);
+		return -1.0;
+	}
+	else {
+		try {
+			time = std::stod(time_string);
+		}
+		catch (std::exception& e) {
+			// since stod failed, presume it's a date-time format
+			is_date_format = true;
+			isodate_str_to_epochtime_conv(time_string);
+			return -1.0;
+		}
+	}
+	
+	return time;
+}
+
+void isodate_str_to_epochtime_conv(std::string& time_string) {
+	double time = 0.0;
+	std::istringstream iss(time_string);
+	std::chrono::system_clock::time_point tp;
+
+	// %OS tells parser to accept seconds including any fractional component
+	iss >> std::chrono::parse("%Y-%m-%dT%H:%M:%OSZ", tp);
+
+	if (iss.fail()) {
+		throw std::runtime_error("Invalid time format: " + time_string);
+	}
+
+	auto epoch_time = tp.time_since_epoch();
+
+	auto secs = std::chrono::duration_cast<std::chrono::seconds>(epoch_time);
+	auto fractional = epoch_time - secs;
 
 	try {
-		result = std::stod(time_string);
+		time = secs.count() + std::chrono::duration<double>(fractional).count();
 	}
 	catch (std::exception& e) {
-		// since stod failed, presume it's a date-time format
-		is_date_format = true;
-		std::istringstream in(time_string);
-		std::chrono::system_clock::time_point tp;
-
-		// %OS tells parser to accept seconds including any fractional component
-		in >> std::chrono::parse("%Y-%m-%dT%H:%M:%OSZ", tp);
-		std::time_t epoch_time = std::chrono::system_clock::to_time_t(tp);
-		
-		// time_string = STRING VERSION OF epoch_time here (including fractional seconds)
-		// return -1.0;
+		std::cerr << "Error processing date format: " << e.what();
 	}
-	return result;
+	
+
+	time_string = std::to_string(time);
 }
