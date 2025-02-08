@@ -87,15 +87,11 @@ void process_file(const std::string& input_filename)
 		for (csv::CSVRow& row : reader)
 		{
 			std::string time_str = row["time"].get<std::string>();
-			double time;
+			double time = get_time_secs(time_str, is_date_format);
 			if (is_first) {
-				if ((time = get_time_secs(time_str, is_date_format)) == -1.0) start_time = time;
+				start_time = time;
 				is_first = false;
-			} else time = get_time_secs(time_str, is_date_format);
-
-			// Run get_time_secs again because time_str will be converted to appropriate format after last run
-			bool always_false = false;
-			time = get_time_secs(time_str, always_false);
+			}
 
 			time -= start_time;
 			double gain = row["gain"].get<double>();
@@ -142,25 +138,18 @@ void process_file(const std::string& input_filename)
 
 double get_time_secs(std::string& time_string, bool& is_date_format) {
 	double time = 0.0;
-
-	if (is_date_format) {
+	try {
+		time = std::stod(time_string);
+	}
+	catch (std::exception& e) {
+		// If conversion fails, assume the string is an ISO date.
+		is_date_format = true;
 		isodate_str_to_epochtime_conv(time_string);
-		return -1.0;
+		time = std::stod(time_string);  // Now time_string holds the numeric value.
 	}
-	else {
-		try {
-			time = std::stod(time_string);
-		}
-		catch (std::exception& e) {
-			// since stod failed, presume it's a date-time format
-			is_date_format = true;
-			isodate_str_to_epochtime_conv(time_string);
-			return -1.0;
-		}
-	}
-	
 	return time;
 }
+
 
 void isodate_str_to_epochtime_conv(std::string& time_string) {
 	double time = 0.0;
@@ -185,7 +174,7 @@ void isodate_str_to_epochtime_conv(std::string& time_string) {
 	catch (std::exception& e) {
 		std::cerr << "Error processing date format: " << e.what();
 	}
-	
+
 
 	time_string = std::to_string(time);
 }
