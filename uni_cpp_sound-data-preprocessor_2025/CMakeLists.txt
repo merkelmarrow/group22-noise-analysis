@@ -22,3 +22,8 @@ FetchContent_MakeAvailable(csv)
 
 target_include_directories(uni_cpp_sound-data-preprocessor_2025 PRIVATE csv)
 target_link_libraries(uni_cpp_sound-data-preprocessor_2025 PRIVATE csv)
+
+# Only add gcov linking when using a compiler that supports/needs it
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    target_link_libraries(uni_cpp_sound-data-preprocessor_2025 PRIVATE gcov)
+endif()

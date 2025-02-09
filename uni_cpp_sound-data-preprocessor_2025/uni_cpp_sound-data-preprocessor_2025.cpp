@@ -178,7 +178,7 @@ bool isodate_str_to_epochtime_conv(std::string& time_string, std::chrono::system
 
 	for (const auto& fmt : { "%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%S" }) {
 		std::istringstream iss(str);
-		if (iss >> parse(fmt, tp)) return true;
+		if (iss >> std::chrono::parse(fmt, tp)) return true;
 	}
 	return false;
 }
