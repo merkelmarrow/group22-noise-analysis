@@ -3,6 +3,7 @@
 #include <vector>
 #include <stdexcept>
 #include <utility>
+#include <fstream>
 #include "csv.hpp"
 
 // helper func to remove spaces
@@ -80,8 +81,22 @@ int main()
 				grouped_data[{location, time_of_day}].push_back(record);
 				aggregated_data.push_back(record);
 			}
+		}
 
+		// Write out each grouped data set into its own csv file
+		for (const auto& entry : grouped_data) {
+			const auto& key = entry.first;
+			const auto& records = entry.second;
+			std::string filename = "dataset_" + key.first + "_" + key.second + ".csv";
 
+			std::ofstream ofs(filename);
+			auto writer = csv::make_csv_writer(ofs);
+			writer << header;
+			for (const auto& record : records) {
+				writer << record;
+			}
+			ofs.close();
+			std::cout << "Wrote file: " << filename << std::endl;
 		}
 
 
