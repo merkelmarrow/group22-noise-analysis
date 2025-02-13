@@ -84,6 +84,7 @@ void process_file(const std::string& input_filename)
 	try {
 		csv::CSVReader reader(input_filename);
 
+
 		// Map to store sum of gains for each 5-second bucket
 		// Key: bucket number (0 for 0-5, 5 for 5-10, etc)
 		// Value: pair-> sum of gains, number of data points in bucket
@@ -103,7 +104,13 @@ void process_file(const std::string& input_filename)
 			}
 
 			time -= start_time;
-			double gain = row["gain"].get<double>();
+			double gain;
+			try {
+				gain = row["gain"].get<double>();
+			}
+			catch (...) {
+				gain = row["Gain"].get<double>();
+			}
 
 			// ignore data after 13 minutes == 780 seconds
 			if (time > 780) break;
