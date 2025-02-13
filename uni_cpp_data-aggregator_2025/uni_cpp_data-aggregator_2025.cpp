@@ -42,7 +42,7 @@ int main()
 		std::vector<std::string> header = { "location", "time_of_day", "day", "avg_gain" };
 
 		// maps key pair (ie. front_gate, morning) to a vector of records
-		// ie. one record could look like
+		// ie. records could look like
 		// location, time_of_day, day, avg_gain
 		// pearse_st_gate, morning, friday, 73.3892
 		// pearse_st_gate, morning, friday, 63.9092
@@ -69,12 +69,15 @@ int main()
 				std::string time_of_day;
 
 				try {
+					if (!location_names.count(location_raw)) throw;
+					if (!day_names.count(day_raw)) throw;
+					if (!TOD_names.count(time_of_day_raw)) throw;
 					location = location_names[location_raw];
 					day = day_names[day_raw];
 					time_of_day = TOD_names[time_of_day_raw];
 				}
 				catch (...) {
-					throw std::runtime_error("Location (A,B,C) or day (1,2,3,4) not recognised.");
+					throw std::runtime_error("Location, day, or time of day not recognised.");
 				}
 
 				std::vector<std::string> record = { location, time_of_day, day, avg_sound };
