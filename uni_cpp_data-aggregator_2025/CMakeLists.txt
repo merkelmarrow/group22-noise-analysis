@@ -1,21 +1,30 @@
-﻿# CMakeList.txt : CMake project for uni_cpp_data-aggregator_2025, include source and define
-# project specific logic here.
-#
+﻿# CMakeList.txt
 cmake_minimum_required (VERSION 3.8)
 
-# Enable Hot Reload for MSVC compilers if supported.
-if (POLICY CMP0141)
-  cmake_policy(SET CMP0141 NEW)
-  set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
-endif()
+include(FetchContent)
 
 project ("uni_cpp_data-aggregator_2025")
 
-# Add source to this project's executable.
-add_executable (uni_cpp_data-aggregator_2025 "uni_cpp_data-aggregator_2025.cpp")
+set (CMAKE_CXX_STANDARD 20)
+set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if (CMAKE_VERSION VERSION_GREATER 3.12)
-  set_property(TARGET uni_cpp_data-aggregator_2025 PROPERTY CXX_STANDARD 20)
+add_executable (uni_cpp_data-aggregator_2025 "uni_cpp_data-aggregator_2025")
+
+# Fetch csv-parser and make it available to my-executable
+FetchContent_Declare(
+  csv  
+  GIT_REPOSITORY https://github.com/vincentlaucsb/csv-parser.git
+  GIT_SHALLOW TRUE 
+  GIT_TAG 2.2.1
+) 
+
+FetchContent_MakeAvailable(csv)
+
+target_include_directories(uni_cpp_data-aggregator_2025 PRIVATE csv)
+target_link_libraries(uni_cpp_data-aggregator_2025 PRIVATE csv)
+
+# Only add gcov linking when using a compiler that supports/needs it
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    target_link_libraries(uni_cpp_data-aggregator_2025 PRIVATE gcov)
 endif()
 
-# TODO: Add tests and install targets if needed.
