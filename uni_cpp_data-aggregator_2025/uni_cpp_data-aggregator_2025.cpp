@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <utility>
 #include <fstream>
+#include <algorithm>
 #include "csv.hpp"
 
 // helper func to remove spaces
@@ -37,6 +38,14 @@ int main()
 			{"Morn", "morning"},
 			{"Noon", "afternoon"},
 			{"Afternoon", "evening"}
+		};
+
+		// map to make sure grouped data is sorted in the right order
+		std::map<std::string, int> day_order = {
+			{"wednesday", 1},
+			{"thursday", 2},
+			{"friday", 3},
+			{"sunday", 4}
 		};
 
 		std::vector<std::string> header = { "location", "time_of_day", "day", "avg_gain" };
@@ -85,6 +94,23 @@ int main()
 				grouped_data[{location, time_of_day}].push_back(record);
 				aggregated_data.push_back(record);
 			}
+		}
+
+		std::sort(aggregated_data.begin() + 1, aggregated_data.end(),
+			[](const std::vector<std::string>& a, const std::vector<std::string>& b) {
+			if (a[0] != b[0]) return a[0] < b[0];
+			if (a[1] != b[1]) return a[1] < b[1];
+			return a[2] < b[2];
+			});
+
+		// sort each group's records by day
+		for (auto& entry : grouped_data) {
+			std::vector<std::vector<std::string>>& records = entry.second;
+			std::sort(records.begin(), records.end(),
+				[&day_order](const std::vector<std::string>& a, const std::vector<std::string>& b) {
+					return day_order[a[2]] < day_order[b[2]];
+				}
+			);
 		}
 
 		// write out each grouped data set into its own csv file
