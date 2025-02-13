@@ -58,6 +58,7 @@ int main()
 			if (trim(row[0].get<std::string>()) == "Location") continue;
 
 			for (size_t i = 0; i < row.size(); i += 5) {
+				if (i + 3 >= row.size()) continue;
 				std::string location_raw = trim(row[i].get<std::string>());
 				std::string time_of_day_raw = trim(row[i + 1].get<std::string>());
 				std::string day_raw = trim(row[i + 2].get<std::string>());
@@ -83,7 +84,7 @@ int main()
 			}
 		}
 
-		// Write out each grouped data set into its own csv file
+		// write out each grouped data set into its own csv file
 		for (const auto& entry : grouped_data) {
 			const auto& key = entry.first;
 			const auto& records = entry.second;
@@ -99,10 +100,19 @@ int main()
 			std::cout << "Wrote file: " << filename << std::endl;
 		}
 
-
+		// write out the aggregated file
+		const std::string agg_filename = "aggregated.csv";
+		std::ofstream ofs(agg_filename);
+		auto writer = csv::make_csv_writer(ofs);
+		for (const auto& record : aggregated_data) {
+			writer << record;
+		}
+		ofs.close();
+		std::cout << "Wrote aggregated file: " << agg_filename << std::endl;
 	}
 	catch (...) {
 		std::cerr << "Something went wrong. Unsuccessful parse.\n";
+		return 1;
 	}
-
+	return 0;
 }
