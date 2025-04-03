@@ -1,4 +1,4 @@
-time_slot,sound_level(dB),
+time_slot,sound_data(dB),
 1,65.179455,morning
 2,64.296625,
 3,65.93325,
